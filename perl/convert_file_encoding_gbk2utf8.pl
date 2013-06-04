@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use File::Find;
 
-die "Convert file encoding from gbk to utf8, usage: $0 <path>\n" unless @ARGV == 1;
+die "Convert file encoding from gbk to utf8, usage: $0 <path> Ignorefile1, Ignorefile2, ...\n" unless @ARGV >= 1;
 
 my $GBK = "ISO-8859";
 my $UTF8 = "UTF-8";
@@ -30,6 +30,12 @@ sub route
 		for (my $i = 0; $i < @IGNORES; $i++) {
 			if ($file_full_path_name =~ m/$IGNORES[$i]/) {
 				return;
+			}
+			for (my $j = 1; $j < @ARGV; $j++) {
+				if ($_ eq $ARGV[$j]) {
+					print "**********************Ignore file $_\n";
+					return;
+				}
 			}
 		}
 		$old_file_enco = `file $_`;
