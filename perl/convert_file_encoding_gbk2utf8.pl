@@ -20,13 +20,22 @@ my @utf8_files;
 my @ascii_files;
 my @unknow_files;
 
-print "Perl script starting...\n";
 print "path=$path, \"@IGNORES\" will be ignored\n";
+
+sub print_info {
+	print "****************************************************\n";
+	print "*****   gbk files size = ".scalar(@gbk_files)." \n";
+	print "*****  utf8 files size = ".scalar(@utf8_files)." \n";
+	print "***** ascii files size = ".scalar(@ascii_files)." \n";
+	print "****************************************************\n";
+}
 
 sub route
 {
 	if (-f $_) {
 		$file_full_path_name = $File::Find::name;
+
+		#Remove ignored dirs and files!
 		for (my $i = 0; $i < @IGNORES; $i++) {
 			if ($file_full_path_name =~ m/$IGNORES[$i]/) {
 				return;
@@ -38,8 +47,10 @@ sub route
 				}
 			}
 		}
-		$old_file_enco = `file $_`;
 
+		$old_file_enco = lc(`file --mime-encoding $_`);
+
+		#Find files need to be converted!
 		if ($old_file_enco =~ m/$GBK/) {
 			push(@gbk_files, $file_full_path_name);
 		}
@@ -55,6 +66,9 @@ sub route
 	}
 }
 
+$GBK = lc($GBK);
+$UTF8 = lc($UTF8);
+$ASCII = lc($ASCII);
 find(\&route, $path);
 
 if (@gbk_files > 0) {
@@ -63,9 +77,6 @@ if (@gbk_files > 0) {
 	print "\n";
 	print "--------------gbk files end\n";
 }
-else {
-	print "No gbk files found!\n";
-}
 
 if (@unknow_files > 0) {
 	print "--------------unknow file encodings' size=".scalar(@unknow_files)."\n";
@@ -73,9 +84,8 @@ if (@unknow_files > 0) {
 	print "\n";
 	print "--------------unknow file encodings end\n";
 }
-else {
-	print "all files gbk, utf8, ascii!\n";
-}
+
+print_info();
 
 my $convert_count = 0;
 
@@ -86,5 +96,5 @@ foreach (@gbk_files) {
 	print "Convert finished:$_\n";
 }
 
-print "Total convert:$convert_count\n";
+print "Total converted:$convert_count\n";
 
