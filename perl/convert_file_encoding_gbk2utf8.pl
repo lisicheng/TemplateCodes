@@ -72,7 +72,7 @@ sub route
 	}
 }
 
-$envi = `uname -s`;
+chomp($envi = `uname -s`);
 
 $GBK = lc($GBK);
 $UTF8 = lc($UTF8);
