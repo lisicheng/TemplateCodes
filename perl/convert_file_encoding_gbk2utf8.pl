@@ -13,6 +13,7 @@ my $ASCII = "ASCII";
 my @IGNORES = (".svn", ".git");
 
 my $path = $ARGV[0];
+my $envi = "Darwin";
 my $file_full_path_name = "";
 my $old_file_enco = "";
 my @gbk_files;
@@ -48,7 +49,12 @@ sub route
 			}
 		}
 
-		$old_file_enco = lc(`file --mime-encoding $_`);
+		if ($envi eq "Darwin") {
+			$old_file_enco = lc(`file --mime-encoding $_`);
+		}
+		elsif ($envi eq "Linux") {
+			$old_file_enco = lc(`file --mime $_`);
+		}
 
 		#Find files need to be converted!
 		if ($old_file_enco =~ m/$GBK/) {
@@ -65,6 +71,8 @@ sub route
 		}
 	}
 }
+
+$envi = `uname -s`;
 
 $GBK = lc($GBK);
 $UTF8 = lc($UTF8);
