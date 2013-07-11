@@ -50,10 +50,10 @@ sub route
 		}
 
 		if ($envi eq "Darwin") {
-			$old_file_enco = lc(`file --mime-encoding $_`);
+			$old_file_enco = lc(`file --mime-encoding $_`."   ".`file $_`);
 		}
 		elsif ($envi eq "Linux") {
-			$old_file_enco = lc(`file --mime $_`);
+			$old_file_enco = lc(`file --mime $_`."   ".`file $_`);
 		}
 
 		#Find files need to be converted!
