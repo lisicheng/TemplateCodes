@@ -2,8 +2,10 @@
 
 my $TEMPLATE_PATH = '/home/arch/se/se-tmplate';
 my $SE_PATH = '/home/arch/se';
+my $NMQ_PATH = '/home/arch/nmq_for_se/nmq/pusher';
 
 my $pid = 'se-lisicheng';
+my $pid_short = 'lisicheng';
 my $port_commit = 2654;
 my $port_query = 2655;
 
@@ -15,9 +17,11 @@ $pid = $pid_lines[0];
 chomp($pid);
 close(PID);
 if ($pid =~ /se-/) {
+	$pid_short = substr($pid, 3);
 	print "pid provided already start with 'se-'\n";
 }
 else {
+	$pid_short = $pid;
 	$pid = "se-$pid";
 }
 print "get pid[$pid] from applicant/pid file!\n";
@@ -83,4 +87,4 @@ sleep(3);
 `sh mk_env.sh`;
 sleep(3);
 
-print "done......\n";
+print "SE module $pid done......\n";
