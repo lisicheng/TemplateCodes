@@ -6,7 +6,6 @@ use warnings;
 my $dir="";
 my $ip="";
 my $port="";
-#my %ip_hash=("key1","v1", "k2", "v2");
 my %ip_hash=();
 
 sub log_debug {
@@ -41,6 +40,7 @@ sub load_hash {
 	}
 	else {
 		&log_warning_n("can not read even one line for file $dir/conf/idsection_list.conf");
+		close(SEC);
 		return 1;
 	}
 	chomp($line);
@@ -49,6 +49,7 @@ sub load_hash {
 	}
 	else {
 		&log_warning_n("should be [idsection_list] line, but: $line");
+		close(SEC);
 		return -1;
 	}
 	while($line = <SEC>) {
@@ -109,9 +110,38 @@ sub load_hash {
 		&log_debug_n("------------------------------------");
 	}
 	close(SEC);
+	return 0;
 }
 
-#check parameters passed by.
+sub operate_ip {
+	if ($ENV{"OSP_MY"} == 0) {
+		$ip_hash{$ip}=$port;
+	}
+	elsif (exists $ip_hash{$ip} && $ip_hash{$ip} eq $port) {
+		delete $ip_hash{$ip};
+	}
+	return 0;
+}
+
+sub rewrite_file {
+	if (open(SEF, ">", "$dir/conf/idsection_list.conf.new")) {
+		print SEF "[idsection_list]\n";
+		while (my($k,$v)=each %ip_hash) {
+			print SEF "[.\@idsection]\n";
+			print SEF "name : idsection\n";
+			print SEF "ip : $ip\n";
+			print SEF "port : $port\n";
+		}
+	}
+	else {
+		log_warning_n("can not open file $dir/conf/idsection_list.conf.new");
+		return -1;
+	}
+	close(SEF);
+	return 0;
+}
+
+# check parameters passed by.
 if (@ARGV < 3) {
 	&log_warning_n("params number passed by incorrect, dir, ip, port needed!");
 	exit(1);
@@ -125,4 +155,20 @@ $port=$ARGV[2];
 &log_debug_n("port=$port");
 
 &load_hash;
+# log out ip_has table!
 &log_ip_hash;
+
+&operate_ip;
+&log_ip_hash;
+
+my $ret = &rewrite_file;
+if ($ret == 0) {
+	log_debug_n("rewrite_file succeed");
+	`cp $dir/conf/idsection_list.conf.new $dir/conf/idsection_list.conf`;
+	exit(0);
+}
+else {
+	log_warning_n("rewrite_file failed");
+	exit(1);
+}
+
